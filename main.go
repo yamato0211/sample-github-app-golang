@@ -38,6 +38,12 @@ func main() {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+		case *github.PullRequestEvent:
+			if err := processPullRequestEvent(ctx, event); err != nil {
+				log.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 		}
 	})
 
@@ -70,6 +76,34 @@ func processIssuesEvent(ctx context.Context, event *github.IssuesEvent) error {
 		Body: &body,
 	}
 	if _, _, err := client.Issues.CreateComment(ctx, repoOwner, repo, issueNumber, comment); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func processPullRequestEvent(ctx context.Context, event *github.PullRequestEvent) error {
+	if event.GetAction() != "opened" {
+		return nil
+	}
+
+	installationID := event.GetInstallation().GetID()
+	client, err := newGithubClient(installationID)
+	if err != nil {
+		return err
+	}
+
+	repoOwner := event.Repo.GetOwner().GetLogin()
+	repo := event.Repo.GetName()
+
+	pullRequest := event.GetPullRequest()
+	pullRequestNumber := pullRequest.GetNumber()
+	user := pullRequest.GetUser().GetLogin()
+	body := "hello, @" + user
+	comment := &github.PullRequestComment{
+		Body: &body,
+	}
+	if _, _, err := client.PullRequests.CreateComment(ctx, repoOwner, repo, pullRequestNumber, comment); err != nil {
 		return err
 	}
 
