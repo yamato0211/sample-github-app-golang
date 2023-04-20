@@ -12,11 +12,6 @@ import (
 	"github.com/google/go-github/v29/github"
 )
 
-const InstallationID = 36641754
-const RepoOwner = "yamato0211"
-const Repo = "sample-github-app-golang"
-const IssueNumber = 1
-
 func main() {
 	http.HandleFunc("/github/events", func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
