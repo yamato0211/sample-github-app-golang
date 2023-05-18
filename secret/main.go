@@ -11,6 +11,6 @@ func main() {
 	if _, err := rand.Read(b); err != nil {
 		log.Fatal(err)
 	}
-
 	fmt.Printf("%x\n", b)
+	fmt.Printf("test")
 }
